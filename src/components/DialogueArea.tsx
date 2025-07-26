@@ -8,9 +8,12 @@ interface Message {
 interface DialogueAreaProps {
   messages: Message[]
   onSendMessage: (message: string) => void
+  isPlayingAudio: boolean
+  onPlayTTS: (text: string) => Promise<void>
+  onStopAudio: () => void
 }
 
-export default function DialogueArea({ messages, onSendMessage }: DialogueAreaProps) {
+export default function DialogueArea({ messages, onSendMessage, isPlayingAudio, onPlayTTS, onStopAudio }: DialogueAreaProps) {
   const [inputValue, setInputValue] = useState('')
   const [showHistory, setShowHistory] = useState(false)
   const [displayedText, setDisplayedText] = useState('')
@@ -129,13 +132,40 @@ export default function DialogueArea({ messages, onSendMessage }: DialogueAreaPr
             {latestMessage.sender === 'character' ? (
               // Luna's message - more compact dating sim style
               <div className="bg-white/85 backdrop-blur-lg rounded-lg p-2.5 sm:p-3 md:p-4 border border-white/60 shadow-lg">
-                <div className="flex items-center mb-1 sm:mb-2">
-                  <span className="text-sm mr-2">🌸</span>
-                  <span className="font-bold text-sm sm:text-base text-gray-800">พี่สาวหงส์</span>
+                <div className="flex items-center justify-between mb-1 sm:mb-2">
+                  <div className="flex items-center">
+                    <span className="text-sm mr-2">🌸</span>
+                    <span className="font-bold text-sm sm:text-base text-gray-800">พี่สาวหงส์</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {!isPlayingAudio ? (
+                      <button
+                        onClick={() => onPlayTTS(latestMessage.text)}
+                        className="p-1 rounded-full bg-pink-100 hover:bg-pink-200 transition-colors"
+                        title="เล่นเสียง"
+                      >
+                        <span className="text-pink-600">🔊</span>
+                      </button>
+                    ) : (
+                      <button
+                        onClick={onStopAudio}
+                        className="p-1 rounded-full bg-red-100 hover:bg-red-200 transition-colors"
+                        title="หยุดเสียง"
+                      >
+                        <span className="text-red-600">⏹️</span>
+                      </button>
+                    )}
+                  </div>
                 </div>
                 <div className="text-black text-sm sm:text-base font-medium leading-relaxed">
                   {displayedText}
                   {isTyping && <span className="animate-pulse">|</span>}
+                  {isPlayingAudio && !isTyping && (
+                    <div className="flex items-center mt-2 text-xs text-pink-600">
+                      <span className="animate-pulse mr-1">🎵</span>
+                      <span>กำลังเล่นเสียง...</span>
+                    </div>
+                  )}
                 </div>
               </div>
             ) : (

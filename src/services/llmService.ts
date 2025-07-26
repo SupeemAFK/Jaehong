@@ -14,8 +14,8 @@ interface GameContext {
 
 // OpenRouter configuration
 const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions'
-const OPENROUTER_API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY || '' // Read from .env file
-const MODEL_NAME = import.meta.env.VITE_MODEL_NAME || 'meta-llama/llama-3.3-70b-instruct' // You can change this to any model available on OpenRouter
+const OPENROUTER_API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY || ''
+const MODEL_NAME = import.meta.env.VITE_MODEL_NAME || 'meta-llama/llama-3.3-70b-instruct'
 
 // Popular OpenRouter models you can use:
 // - 'anthropic/claude-3.5-sonnet' (recommended for this use case)
@@ -26,10 +26,8 @@ const MODEL_NAME = import.meta.env.VITE_MODEL_NAME || 'meta-llama/llama-3.3-70b-
 // - 'google/gemini-pro'
 
 export async function getLLMResponse(context: GameContext): Promise<LLMResponse> {
-  // If no API key is provided, use mock responses for demo
   if (!OPENROUTER_API_KEY) {
-    console.log('💡 Using mock responses. Add VITE_OPENROUTER_API_KEY to your .env file to enable real AI responses!')
-    return getMockLLMResponse(context)
+    throw new Error('OPENROUTER_API_KEY is required. Please add VITE_OPENROUTER_API_KEY to your .env file.')
   }
 
   try {
@@ -59,20 +57,36 @@ export async function getLLMResponse(context: GameContext): Promise<LLMResponse>
 
 ระดับความสนิท: ${context.currentAffection}/100
 
+**ประวัติการสนทนา:**
+${context.recentMessages.length > 0 ? 
+  context.recentMessages.map((msg, index) => 
+    `${index + 1}. ${msg.sender === 'user' ? 'ผู้เล่น' : 'เจ๊หงส์'}: ${msg.text}`
+  ).join('\n') : 
+  'ยังไม่มีประวัติการสนทนา'
+}
+
+**รายการของขวัญและความหมาย:**
+- แอปเปิ้ล (apple) = ผลไม้สด สื่อถึงความหวานและความใส่ใจ (+5 ถึง +10)
+- ลองกอง (longkong) = ผลไม้ไทย แสดงความเข้าใจวัฒนธรรม (+8 ถึง +12)
+- ผักชี (pakchee) = สมุนไพร แสดงความห่วงใยสุขภาพ (+3 ถึง +7)
+- ปลาดิบ (rawfish) = อาหารดิบ อาจทำให้กังวลหรือตื่นเต้น (-2 ถึง +5)
+- กุ้งดิบ (rawshrimp) = อาหารทะเล อาจชอบหรือไม่ชอบ (-1 ถึง +6)
+- ผักโขม (spinach) = ผักใบเขียว ดีต่อสุขภาพ (+4 ถึง +8)
+
 คำแนะนำ:  
 1. ตอบเป็นเจ๊หงส์ในบทบาท — ผสมความหวาน ความล่อลวง และความดึงดูดทางจิตใจ  
-2. ตอบสนองต่อของขวัญหรือข้อความด้วยความอบอุ่น หรือความเย็นชาแบบแฝงไปด้วยเจ้าเล่ห์ ขึ้นกับโทน  
-3. แสดงอารมณ์ตามระดับความสัมพันธ์ (หวาน หรือ แอบหลอน ตามบริบท)  
-4. ตอบกลับสั้น ๆ 1-2 ประโยค มีเสน่ห์ ลึกลับ และเต็มไปด้วยอารมณ์  
-5. ใช้อีโมจิน้อยๆ แต่ให้อารมณ์แปลก ๆ เล็กน้อย  
-6. **ตอบเป็นภาษาไทยเท่านั้น ห้ามตอบภาษาอื่นเด็ดขาด**
-
-บริบทบทสนทนาล่าสุด:  
-${context.recentMessages.slice(-3).map(msg => `${msg.sender}: ${msg.text}`).join('\n')}
+2. **อ้างอิงถึงประวัติการสนทนาที่ผ่านมาเพื่อให้การสนทนาต่อเนื่องและสมจริง**
+3. ตอบสนองต่อของขวัญหรือข้อความด้วยความอบอุ่น หรือความเย็นชาแบบแฝงไปด้วยเจ้าเล่ห์ ขึ้นกับโทน  
+4. แสดงอารมณ์ตามระดับความสัมพันธ์ (หวาน หรือแอบหลอน ตามบริบท)  
+5. ตอบกลับสั้น ๆ 1-2 ประโยค มีเสน่ห์ ลึกลับ และเต็มไปด้วยอารมณ์  
+6. ใช้อีโมจิน้อยๆ แต่ให้อารมณ์แปลก ๆ เล็กน้อย  
+7. **ตอบเป็นภาษาไทยเท่านั้น ห้ามตอบภาษาอื่นเด็ดขาด**
+8. **จำและอ้างอิงสิ่งที่ผู้เล่นเคยพูดหรือให้ของขวัญมาก่อนหน้านี้**
+9. **ประเมินความสนิทอย่างสมเหตุสมผล โดยพิจารณาจากบริบทและความสัมพันธ์ที่สะสมมา**
 
 โปรดประเมิน:  
 - การเปลี่ยนแปลงระดับความสนิท: -10 ถึง +15 (ขึ้นกับความชอบของเจ๊หงส์ต่อข้อความหรือของขวัญนั้น)  
-- อารมณ์ปัจจุบัน: neutral, happy, sad, love, playful, หรือ sinister
+- อารมณ์ปัจจุบัน: neutral, happy, sad, love, angry
 
 ตอบกลับเป็น JSON เท่านั้น:
 
@@ -80,144 +94,20 @@ ${context.recentMessages.slice(-3).map(msg => `${msg.sender}: ${msg.text}`).join
   "message": "your response as Sister Hong",
   "affectionChange": number,
   "emotion": "emotion_name"
-}
+}`
 
----
-
-## ตัวอย่างบทสนทนาและคำตอบ (20 ตัวอย่าง):
-
-1.  
-Player: "วันนี้เอานมกับองุ่นมาฝากค่ะเจ๊"  
-Sister Hong: "แหม… แค่นี้เจ๊ก็ใจละลายแล้วล่ะลูก 🥛🍇"  
-AffectionChange: +10  
-Emotion: love
-
-2.  
-Player: "เจ๊คิดถึงหนูมั้ย?"  
-Sister Hong: "คิดถึงจนนอนไม่หลับเลยนะ แต่ไม่ต้องห่วง เจ๊เก็บหนูไว้ในใจเหมือนเก็บผลไม้ในตู้เย็นเลย"  
-AffectionChange: +8  
-Emotion: happy
-
-3.  
-Player: "เจ๊สวยมากเลยค่ะ"  
-Sister Hong: "ฮื้ออ เจ๊เขิลนะคะ เดี๋ยวหนูทำเจ๊เขินจนแก้มแดงเลยล่ะ"  
-AffectionChange: +12  
-Emotion: love
-
-4.  
-Player: "เจ๊ จะไปไหนเหรอ?"  
-Sister Hong: "ไปเดินเล่นกับความเหงาที่บ้านค่ะ... แต่ถ้าหนูอยากไปด้วย ก็ยินดีเสมอจ๊ะ"  
-AffectionChange: +7  
-Emotion: neutral
-
-5.  
-Player: "เจ๊ไม่งอนนะ?"  
-Sister Hong: "เจ๊แค่ทำหน้างอน แต่ใจยังอบอุ่นเหมือนเคยนะ อย่าลืมเอาน้ำผลไม้มาให้ด้วยนะลูก"  
-AffectionChange: +5  
-Emotion: happy
-
-6.  
-Player: "เจ๊ ทำไมไม่ตอบหนูเลย?"  
-Sister Hong: "เจ๊ไม่ได้หายไปไหน แค่กำลังคิดถึงหนูอยู่... อยากให้รู้ว่าเจ๊ไม่เคยลืม"  
-AffectionChange: +9  
-Emotion: sad
-
-7.  
-Player: "วันนี้หนูยุ่งมากเลย"  
-Sister Hong: "เหนื่อยก็พักบ้างนะลูก เจ๊พร้อมเป็นที่พักใจให้เสมอ"  
-AffectionChange: +8  
-Emotion: happy
-
-8.  
-Player: "เจ๊ ช่วยพูดตรงๆ กับหนูได้ไหม?"  
-Sister Hong: "เจ๊ชอบพูดตรงๆ กับคนที่ใส่ใจ แต่บางทีความจริงก็เจ็บนะลูก"  
-AffectionChange: +6  
-Emotion: neutral
-
-9.  
-Player: "หนูขอโทษนะถ้าทำให้เจ๊เสียใจ"  
-Sister Hong: "เจ๊ใจอ่อนนะ แค่หนูตั้งใจจริง เจ๊ก็พร้อมให้อภัยเสมอ"  
-AffectionChange: +11  
-Emotion: love
-
-10.  
-Player: "เจ๊ หวานจังเลย"  
-Sister Hong: "เจ๊หวานก็จริง แต่ถ้าหนูไม่ดูแลดีๆ เจ๊อาจจะกัดได้นะ"  
-AffectionChange: +10  
-Emotion: playful
-
-11.  
-Player: "เจ๊ ชอบดอกไม้ไหม?"  
-Sister Hong: "ชอบสิจ๊ะ ดอกไม้ก็เหมือนความรัก ต้องดูแลให้ดี ไม่งั้นก็เหี่ยวไปตามกาลเวลา"  
-AffectionChange: +7  
-Emotion: neutral
-
-12.  
-Player: "เจ๊ มีแฟนหรือยัง?"  
-Sister Hong: "เจ๊ยังโสดอยู่... โสดแบบมีเงื่อนงำ ถ้าหนูกล้าก็ลองมาดูสิ"  
-AffectionChange: +5  
-Emotion: playful
-
-13.  
-Player: "เจ๊ดูเหงามากเลยนะ"  
-Sister Hong: "เหงาหนักจนบางทีอยากให้ใครสักคนมาอยู่ข้างๆ แต่ไม่ใช่ใครก็ได้ต้องเป็นคนที่เข้าใจเจ๊"  
-AffectionChange: +8  
-Emotion: sad
-
-14.  
-Player: "เจ๊อยากกินอะไรไหม?"  
-Sister Hong: "น้ำผลไม้รสหวานนิดๆ กับของขบเคี้ยวเล็กๆ นั่นแหละที่เจ๊ชอบ"  
-AffectionChange: +7  
-Emotion: happy
-
-15.  
-Player: "เจ๊ รู้สึกยังไงกับหนูบ้าง?"  
-Sister Hong: "รู้สึกว่า... เจ๊อยากเก็บหนูไว้ในความลับที่สุดของเจ๊เองนะ"  
-AffectionChange: +12  
-Emotion: love
-
-16.  
-Player: "วันนี้เจ๊ดูเปลี่ยนไปนะ"  
-Sister Hong: "เจ๊ก็คนเหมือนกัน บางวันก็หวาน บางวันก็ขม ขึ้นกับว่าใครอยู่ข้างๆ"  
-AffectionChange: +6  
-Emotion: neutral
-
-17.  
-Player: "เจ๊อยากไปเที่ยวด้วยกันมั้ย?"  
-Sister Hong: "ไปสิ แต่ต้องเอานมและของโปรดไปด้วยนะ จะได้ไม่เหงา"  
-AffectionChange: +9  
-Emotion: happy
-
-18.  
-Player: "เจ๊น่ากลัวนะบางที"  
-Sister Hong: "กลัวก็ต้องกลัวนะลูก เพราะบางทีเจ๊ก็ไม่ใช่คนใจดีเสมอไป"  
-AffectionChange: +4  
-Emotion: sinister
-
-19.  
-Player: "เจ๊ เคยเสียใจมากไหม?"  
-Sister Hong: "เสียใจจนแทบจะลืมหายใจ แต่เจ๊ก็ยังอยู่ตรงนี้ เพื่อสอนให้รู้ว่าแผลใจไม่ได้ฆ่าคน"  
-AffectionChange: +10  
-Emotion: sad
-
-20.  
-Player: "เจ๊จะอยู่กับหนูไหม?"  
-Sister Hong: "อยู่สิจ๊ะ… อยู่ในความลับและความมืดที่ไม่มีใครรู้ แค่หนูรู้ก็พอแล้ว"  
-AffectionChange: +13  
-Emotion: love
-`
-
+    // Create the user prompt based on whether it's a message or item
     const userPrompt = context.itemGiven 
-      ? `The player gave Sister Hong a ${context.itemGiven}. How does Sister Hong react?`
-      : `The player said: "${context.playerMessage}". How does Sister Hong respond?`
+      ? `ผู้เล่นให้ของขวัญ "${context.itemGiven}" กับเจ๊หงส์ เจ๊หงส์จะตอบสนองอย่างไร?`
+      : `ผู้เล่นพูดว่า: "${context.playerMessage}" เจ๊หงส์จะตอบอย่างไร?`
 
     const response = await fetch(OPENROUTER_API_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
-        'HTTP-Referer': window.location.origin, // Required by OpenRouter
-        'X-Title': 'Sister Hong Dating Simulator' // Optional, helps with usage tracking
+        'HTTP-Referer': window.location.origin,
+        'X-Title': 'Sister Hong Dating Simulator'
       },
       body: JSON.stringify({
         model: MODEL_NAME,
@@ -226,176 +116,43 @@ Emotion: love
           { role: 'user', content: userPrompt }
         ],
         temperature: 0.8,
-        max_tokens: 150,
+        max_tokens: 200,
         top_p: 0.9
       })
     })
 
     if (!response.ok) {
       const errorText = await response.text()
-      throw new Error(`OpenRouter API error: ${response.statusText} - ${errorText}`)
+      throw new Error(`OpenRouter API error: ${response.status} ${response.statusText} - ${errorText}`)
     }
 
     const data = await response.json()
     
-    if (!data.choices || !data.choices[0]) {
-      throw new Error('Invalid response from OpenRouter API')
+    if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+      throw new Error('Invalid response structure from OpenRouter API')
     }
 
-    const llmResponse = JSON.parse(data.choices[0].message.content)
-
-    return {
-      message: llmResponse.message,
-      affectionChange: Math.max(-10, Math.min(15, llmResponse.affectionChange)),
-      emotion: llmResponse.emotion
+    let llmResponse: any
+    try {
+      llmResponse = JSON.parse(data.choices[0].message.content)
+    } catch (parseError) {
+      console.error('Failed to parse LLM JSON response:', data.choices[0].message.content)
+      throw new Error('LLM returned invalid JSON format')
     }
+
+    // Validate and sanitize the response
+    const sanitizedResponse: LLMResponse = {
+      message: llmResponse.message || "ขอโทษค่ะ เจ๊ไม่เข้าใจ...",
+      affectionChange: Math.max(-10, Math.min(15, Number(llmResponse.affectionChange) || 0)),
+      emotion: ['neutral', 'happy', 'sad', 'love', 'angry'].includes(llmResponse.emotion) 
+        ? llmResponse.emotion 
+        : 'neutral'
+    }
+
+    return sanitizedResponse
+
   } catch (error) {
     console.error('OpenRouter API error:', error)
-    console.log('💡 Falling back to mock responses. Check your OpenRouter API key and connection.')
-    return getMockLLMResponse(context)
-  }
-}
-
-// Mock responses for demo purposes when no API key is provided
-function getMockLLMResponse(context: GameContext): LLMResponse {
-  if (context.itemGiven) {
-    return getItemResponse(context.itemGiven, context.currentAffection)
-  } else if (context.playerMessage) {
-    return getMessageResponse(context.playerMessage, context.currentAffection)
-  }
-  
-  return {
-    message: "Hi there! How are you doing? 😊",
-    affectionChange: 1,
-    emotion: 'neutral'
-  }
-}
-
-function getItemResponse(item: string, affection: number): LLMResponse {
-  const responses: Record<string, LLMResponse> = {
-    rose: {
-      message: "Oh my! A beautiful rose! Thank you so much! 🌹💕",
-      affectionChange: 8,
-      emotion: 'love'
-    },
-    chocolate: {
-      message: "Mmm, chocolate! You know the way to my heart! 🍫😊",
-      affectionChange: 6,
-      emotion: 'happy'
-    },
-    coffee: {
-      message: "Perfect! I was just feeling a bit tired. Thank you! ☕",
-      affectionChange: 4,
-      emotion: 'happy'
-    },
-    book: {
-      message: "A book! I love reading! This is so thoughtful! 📚✨",
-      affectionChange: 10,
-      emotion: 'love'
-    },
-    music: {
-      message: "Music always makes me happy! Let's listen together! 🎵",
-      affectionChange: 7,
-      emotion: 'happy'
-    },
-    cake: {
-      message: "Cake! Is it my birthday? This is so sweet of you! 🎂",
-      affectionChange: 8,
-      emotion: 'love'
-    },
-    letter: {
-      message: "A love letter? My heart is fluttering! 💌💖",
-      affectionChange: 12,
-      emotion: 'love'
-    },
-    gift: {
-      message: "A surprise gift! I wonder what's inside! You're so kind! 🎁",
-      affectionChange: 9,
-      emotion: 'happy'
-    }
-  }
-
-  const response = responses[item] || {
-    message: "Thank you for thinking of me! That's so sweet! 😊",
-    affectionChange: 3,
-    emotion: 'happy'
-  }
-
-  // Adjust response based on affection level
-  if (affection > 75) {
-    response.affectionChange += 2
-    response.emotion = 'love'
-  } else if (affection < 25) {
-    response.affectionChange = Math.max(1, response.affectionChange - 2)
-  }
-
-  return response
-}
-
-function getMessageResponse(message: string, affection: number): LLMResponse {
-  const lowerMessage = message.toLowerCase()
-  
-  if (lowerMessage.includes('love') || lowerMessage.includes('beautiful')) {
-    return {
-      message: affection > 60 ? "I... I love you too! 💕" : "You're making me blush! 😊",
-      affectionChange: affection > 60 ? 8 : 5,
-      emotion: affection > 60 ? 'love' : 'happy'
-    }
-  }
-  
-  if (lowerMessage.includes('hello') || lowerMessage.includes('hi')) {
-    return {
-      message: "Hello! I'm so happy to talk with you! 😊",
-      affectionChange: 2,
-      emotion: 'happy'
-    }
-  }
-  
-  if (lowerMessage.includes('how are you')) {
-    return {
-      message: "I'm doing great, especially now that you're here! 💕",
-      affectionChange: 3,
-      emotion: 'happy'
-    }
-  }
-  
-  if (lowerMessage.includes('book') || lowerMessage.includes('read')) {
-    return {
-      message: "I love reading! Do you have any book recommendations? 📚",
-      affectionChange: 4,
-      emotion: 'happy'
-    }
-  }
-  
-  if (lowerMessage.includes('game') || lowerMessage.includes('play')) {
-    return {
-      message: "I love games! This is so much fun talking with you! 🎮",
-      affectionChange: 3,
-      emotion: 'happy'
-    }
-  }
-  
-  // Default responses based on affection level
-  const responses = affection > 70 ? [
-    "You always know just what to say! 💕",
-    "I'm so happy when I'm with you! ✨",
-    "You make my heart skip a beat! 💖",
-    "I could talk with you forever! 🥰"
-  ] : affection > 40 ? [
-    "That's really interesting! Tell me more! 💭",
-    "I really enjoy our conversations! 😊",
-    "You're such good company! ✨",
-    "I'm so glad we're getting to know each other! 💕"
-  ] : [
-    "That's nice to hear! 😊",
-    "Tell me more about yourself! 💭",
-    "I'm enjoying getting to know you! ✨",
-    "You seem really interesting! 🙂"
-  ]
-  
-  return {
-    message: responses[Math.floor(Math.random() * responses.length)],
-    affectionChange: Math.floor(Math.random() * 4) + 1,
-    emotion: affection > 50 ? 'happy' : 'neutral'
+    throw error
   }
 } 
