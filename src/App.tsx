@@ -8,19 +8,23 @@ import { getLLMResponse } from './services/llmService'
 
 interface GameState {
   affectionScore: number
+  points: number
   messages: Array<{ sender: 'user' | 'character', text: string }>
   characterEmotion: 'neutral' | 'happy' | 'sad' | 'love' | 'angry'
   isProcessing: boolean
+  ownedItems: string[]
 }
 
 function App() {
   const [gameState, setGameState] = useState<GameState>({
-    affectionScore: 50,
+    affectionScore: 0,
+    points: 10,
     messages: [
       { sender: 'character', text: 'สวัสดีค่ะ! ยินดีที่ได้รู้จักนะคะ! ฉันชื่อพี่สาวหงส์ 💕' }
     ],
     characterEmotion: 'neutral',
-    isProcessing: false
+    isProcessing: false,
+    ownedItems: []
   })
 
   const handleDragEnd = async (event: DragEndEvent) => {
@@ -34,6 +38,15 @@ function App() {
   }
 
   const handleItemGiven = async (itemId: string) => {
+    // Check if player owns the item
+    if (!gameState.ownedItems.includes(itemId)) {
+      setGameState(prev => ({
+        ...prev,
+        messages: [...prev.messages, { sender: 'character', text: 'เอ๋? คุณไม่มีของชิ้นนี้นะคะ! ต้องซื้อก่อนนะ 😅' }]
+      }))
+      return
+    }
+
     setGameState(prev => ({ ...prev, isProcessing: true }))
     
     try {
@@ -49,7 +62,8 @@ function App() {
         affectionScore: Math.max(0, Math.min(100, prev.affectionScore + response.affectionChange)),
         messages: [...prev.messages, { sender: 'character', text: response.message }],
         characterEmotion: response.emotion,
-        isProcessing: false
+        isProcessing: false,
+        ownedItems: prev.ownedItems.filter(item => item !== itemId) // Remove used item
       }))
     } catch (error) {
       console.error('Error getting LLM response:', error)
@@ -58,7 +72,8 @@ function App() {
         ...prev,
         messages: [...prev.messages, { sender: 'character', text: `ขอบคุณสำหรับ ${itemId} นะคะ! 😊` }],
         affectionScore: Math.max(0, Math.min(100, prev.affectionScore + 3)),
-        isProcessing: false
+        isProcessing: false,
+        ownedItems: prev.ownedItems.filter(item => item !== itemId) // Remove used item
       }))
     }
   }
@@ -79,21 +94,42 @@ function App() {
          characterName: 'พี่สาวหงส์'
        })
 
+      // Award points for conversation (1-3 points based on affection change)
+      const pointsEarned = Math.max(1, Math.abs(response.affectionChange))
+
       setGameState(prev => ({
         ...prev,
         affectionScore: Math.max(0, Math.min(100, prev.affectionScore + response.affectionChange)),
+        points: prev.points + pointsEarned,
         messages: [...prev.messages, { sender: 'character', text: response.message }],
         characterEmotion: response.emotion,
         isProcessing: false
       }))
     } catch (error) {
       console.error('Error getting LLM response:', error)
-      // Fallback response
+      // Fallback response - still award 1 point for conversation
       setGameState(prev => ({
         ...prev,
         messages: [...prev.messages, { sender: 'character', text: "น่าสนใจจังเลยค่ะ! เล่าให้ฟังอีกสิคะ! 💭" }],
         affectionScore: Math.max(0, Math.min(100, prev.affectionScore + 1)),
+        points: prev.points + 1,
         isProcessing: false
+      }))
+    }
+  }
+
+  const handlePurchaseItem = (itemId: string, cost: number) => {
+    if (gameState.points >= cost) {
+      setGameState(prev => ({
+        ...prev,
+        points: prev.points - cost,
+        ownedItems: [...prev.ownedItems, itemId],
+        messages: [...prev.messages, { sender: 'character', text: `ได้แล้วค่ะ! คุณซื้อของชิ้นนี้แล้ว ลองเอามาให้ฉันดูสิ! 😊` }]
+      }))
+    } else {
+      setGameState(prev => ({
+        ...prev,
+        messages: [...prev.messages, { sender: 'character', text: `อ๋อ... คุณมีแต้มไม่พอนะคะ คุยกับฉันเพิ่มเติมแล้วจะได้แต้มมากขึ้นค่ะ! 💕` }]
       }))
     }
   }
@@ -106,7 +142,11 @@ function App() {
       >
         {/* Floating Sidebar */}
         <div className="absolute left-2 md:left-4 top-2 md:top-4 bottom-36 md:bottom-44 lg:bottom-48 w-48 md:w-64 bg-white/20 backdrop-blur-lg rounded-xl md:rounded-2xl shadow-2xl border border-white/30 z-10 overflow-hidden">
-          <Sidebar />
+          <Sidebar 
+            points={gameState.points}
+            ownedItems={gameState.ownedItems}
+            onPurchaseItem={handlePurchaseItem}
+          />
         </div>
 
         {/* Main Game Area - Character */}
@@ -140,6 +180,7 @@ function App() {
           <AffectionPanel 
             affectionScore={gameState.affectionScore}
             characterName="พี่สาวหงส์"
+            points={gameState.points}
           />
         </div>
       </div>
