@@ -53,7 +53,7 @@ function App() {
       const response = await getLLMResponse({
         itemGiven: itemId,
         currentAffection: gameState.affectionScore,
-        recentMessages: gameState.messages.slice(-5),
+        recentMessages: gameState.messages.slice(-6), // Send last 6 messages for better context
         characterName: 'พี่สาวหงส์'
       })
 
@@ -80,19 +80,20 @@ function App() {
 
   const handleSendMessage = async (message: string) => {
     // Add user message immediately
+    const updatedMessages = [...gameState.messages, { sender: 'user' as const, text: message }]
     setGameState(prev => ({
       ...prev,
-      messages: [...prev.messages, { sender: 'user', text: message }],
+      messages: updatedMessages,
       isProcessing: true
     }))
 
     try {
-             const response = await getLLMResponse({
-         playerMessage: message,
-         currentAffection: gameState.affectionScore,
-         recentMessages: [...gameState.messages, { sender: 'user' as const, text: message }].slice(-5),
-         characterName: 'พี่สาวหงส์'
-       })
+      const response = await getLLMResponse({
+        playerMessage: message,
+        currentAffection: gameState.affectionScore,
+        recentMessages: updatedMessages.slice(-6), // Send last 6 messages for better context
+        characterName: 'พี่สาวหงส์'
+      })
 
       // Award points for conversation (1-3 points based on affection change)
       const pointsEarned = Math.max(1, Math.abs(response.affectionChange))
