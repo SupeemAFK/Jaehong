@@ -5,6 +5,7 @@ import Character from './components/Character'
 import DialogueArea from './components/DialogueArea'
 import AffectionPanel from './components/AffectionPanel'
 import { getLLMResponse } from './services/llmService'
+import { TTSService } from './services/ttsService'
 
 interface GameState {
   affectionScore: number
@@ -13,6 +14,8 @@ interface GameState {
   characterEmotion: 'neutral' | 'happy' | 'sad' | 'love' | 'angry'
   isProcessing: boolean
   ownedItems: string[]
+  isPlayingAudio: boolean
+  currentAudio: HTMLAudioElement | null
 }
 
 function App() {
@@ -24,8 +27,54 @@ function App() {
     ],
     characterEmotion: 'neutral',
     isProcessing: false,
-    ownedItems: []
+    ownedItems: [],
+    isPlayingAudio: false,
+    currentAudio: null
   })
+
+  // Function to handle TTS playback
+  const playTTS = async (text: string) => {
+    try {
+      // Stop current audio if playing
+      if (gameState.currentAudio) {
+        gameState.currentAudio.pause()
+        gameState.currentAudio.remove()
+      }
+
+      setGameState(prev => ({ ...prev, isPlayingAudio: true }))
+      
+      const audioUrl = await TTSService.generateSpeech(text)
+      const audio = await TTSService.playAudio(audioUrl)
+      
+      setGameState(prev => ({ ...prev, currentAudio: audio }))
+      
+      // Handle audio end
+      audio.onended = () => {
+        setGameState(prev => ({ 
+          ...prev, 
+          isPlayingAudio: false, 
+          currentAudio: null 
+        }))
+      }
+      
+    } catch (error) {
+      console.error('TTS Error:', error)
+      setGameState(prev => ({ ...prev, isPlayingAudio: false }))
+    }
+  }
+
+  // Function to stop current audio
+  const stopAudio = () => {
+    if (gameState.currentAudio) {
+      gameState.currentAudio.pause()
+      gameState.currentAudio.remove()
+      setGameState(prev => ({ 
+        ...prev, 
+        isPlayingAudio: false, 
+        currentAudio: null 
+      }))
+    }
+  }
 
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event
@@ -65,16 +114,23 @@ function App() {
         isProcessing: false,
         ownedItems: prev.ownedItems.filter(item => item !== itemId) // Remove used item
       }))
+
+      // Play TTS for character response
+      await playTTS(response.message)
     } catch (error) {
       console.error('Error getting LLM response:', error)
       // Fallback response
-      setGameState(prev => ({
-        ...prev,
-        messages: [...prev.messages, { sender: 'character', text: `ขอบคุณสำหรับ ${itemId} นะคะ! 😊` }],
-        affectionScore: Math.max(0, Math.min(100, prev.affectionScore + 3)),
-        isProcessing: false,
-        ownedItems: prev.ownedItems.filter(item => item !== itemId) // Remove used item
-      }))
+              const fallbackMessage = `ขอบคุณสำหรับ ${itemId} นะคะ! 😊`
+        setGameState(prev => ({
+          ...prev,
+          messages: [...prev.messages, { sender: 'character', text: fallbackMessage }],
+          affectionScore: Math.max(0, Math.min(100, prev.affectionScore + 3)),
+          isProcessing: false,
+          ownedItems: prev.ownedItems.filter(item => item !== itemId) // Remove used item
+        }))
+
+        // Play TTS for fallback response
+        await playTTS(fallbackMessage)
     }
   }
 
@@ -106,16 +162,23 @@ function App() {
         characterEmotion: response.emotion,
         isProcessing: false
       }))
+
+      // Play TTS for character response
+      await playTTS(response.message)
     } catch (error) {
       console.error('Error getting LLM response:', error)
       // Fallback response - still award 1 point for conversation
+      const fallbackMessage = "น่าสนใจจังเลยค่ะ! เล่าให้ฟังอีกสิคะ! 💭"
       setGameState(prev => ({
         ...prev,
-        messages: [...prev.messages, { sender: 'character', text: "น่าสนใจจังเลยค่ะ! เล่าให้ฟังอีกสิคะ! 💭" }],
+        messages: [...prev.messages, { sender: 'character', text: fallbackMessage }],
         affectionScore: Math.max(0, Math.min(100, prev.affectionScore + 1)),
         points: prev.points + 1,
         isProcessing: false
       }))
+
+      // Play TTS for fallback response
+      await playTTS(fallbackMessage)
     }
   }
 
@@ -173,6 +236,9 @@ function App() {
           <DialogueArea 
             messages={gameState.messages}
             onSendMessage={handleSendMessage}
+            isPlayingAudio={gameState.isPlayingAudio}
+            onPlayTTS={playTTS}
+            onStopAudio={stopAudio}
           />
         </div>
 
