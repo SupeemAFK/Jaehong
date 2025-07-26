@@ -17,7 +17,7 @@ function App() {
   const [gameState, setGameState] = useState<GameState>({
     affectionScore: 50,
     messages: [
-      { sender: 'character', text: 'Hello! Nice to meet you! I\'m Luna 💕' }
+      { sender: 'character', text: 'สวัสดีค่ะ! ยินดีที่ได้รู้จักนะคะ! ฉันชื่อพี่สาวหงส์ 💕' }
     ],
     characterEmotion: 'neutral',
     isProcessing: false
@@ -41,7 +41,7 @@ function App() {
         itemGiven: itemId,
         currentAffection: gameState.affectionScore,
         recentMessages: gameState.messages.slice(-5),
-        characterName: 'Luna'
+        characterName: 'พี่สาวหงส์'
       })
 
       setGameState(prev => ({
@@ -56,7 +56,7 @@ function App() {
       // Fallback response
       setGameState(prev => ({
         ...prev,
-        messages: [...prev.messages, { sender: 'character', text: `Thank you for the ${itemId}! 😊` }],
+        messages: [...prev.messages, { sender: 'character', text: `ขอบคุณสำหรับ ${itemId} นะคะ! 😊` }],
         affectionScore: Math.max(0, Math.min(100, prev.affectionScore + 3)),
         isProcessing: false
       }))
@@ -76,7 +76,7 @@ function App() {
          playerMessage: message,
          currentAffection: gameState.affectionScore,
          recentMessages: [...gameState.messages, { sender: 'user' as const, text: message }].slice(-5),
-         characterName: 'Luna'
+         characterName: 'พี่สาวหงส์'
        })
 
       setGameState(prev => ({
@@ -91,7 +91,7 @@ function App() {
       // Fallback response
       setGameState(prev => ({
         ...prev,
-        messages: [...prev.messages, { sender: 'character', text: "That's interesting! Tell me more! 💭" }],
+        messages: [...prev.messages, { sender: 'character', text: "น่าสนใจจังเลยค่ะ! เล่าให้ฟังอีกสิคะ! 💭" }],
         affectionScore: Math.max(0, Math.min(100, prev.affectionScore + 1)),
         isProcessing: false
       }))
@@ -100,46 +100,46 @@ function App() {
 
   return (
     <DndContext onDragEnd={handleDragEnd}>
-      <div className="min-h-screen bg-gradient-to-br from-pink-100 to-purple-200 flex">
-        {/* Sidebar */}
-        <div className="w-64 bg-white/80 backdrop-blur-sm shadow-lg">
+      <div 
+        className="min-h-screen bg-cover bg-center bg-no-repeat bg-fixed relative"
+        style={{ backgroundImage: 'url(/background.jpg)' }}
+      >
+        {/* Floating Sidebar */}
+        <div className="absolute left-2 md:left-4 top-2 md:top-4 bottom-36 md:bottom-44 lg:bottom-48 w-48 md:w-64 bg-white/20 backdrop-blur-lg rounded-xl md:rounded-2xl shadow-2xl border border-white/30 z-10 overflow-hidden">
           <Sidebar />
         </div>
 
-        {/* Main Game Area */}
-        <div className="flex-1 flex flex-col">
-          {/* Character Area */}
-          <div className="flex-1 flex items-center justify-center relative">
-            <Character 
-              emotion={gameState.characterEmotion}
-              affectionScore={gameState.affectionScore}
-            />
-            
-            {/* Processing Indicator */}
-            {gameState.isProcessing && (
-              <div className="absolute top-4 right-4 bg-white/90 rounded-lg p-3 shadow-lg">
-                <div className="flex items-center space-x-2">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-pink-500"></div>
-                  <span className="text-sm text-gray-600">Luna is thinking...</span>
-                </div>
+        {/* Main Game Area - Character */}
+        <div className="flex-1 flex items-center justify-center relative min-h-screen">
+          <Character 
+            emotion={gameState.characterEmotion}
+            affectionScore={gameState.affectionScore}
+          />
+          
+          {/* Processing Indicator */}
+          {gameState.isProcessing && (
+            <div className="absolute top-8 right-8 bg-white/30 backdrop-blur-lg rounded-xl p-4 shadow-2xl border border-white/40">
+              <div className="flex items-center space-x-3">
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-pink-400"></div>
+                <span className="text-sm text-white font-medium drop-shadow-lg">พี่สาวหงส์กำลังคิด...</span>
               </div>
-            )}
-          </div>
-
-          {/* Dialogue Area */}
-          <div className="h-64 bg-white/90 backdrop-blur-sm border-t">
-            <DialogueArea 
-              messages={gameState.messages}
-              onSendMessage={handleSendMessage}
-            />
-          </div>
+            </div>
+          )}
         </div>
 
-        {/* Affection Panel */}
-        <div className="w-64 bg-white/80 backdrop-blur-sm shadow-lg">
+        {/* Floating Dialogue Area - Full width between sidebars */}
+        <div className="absolute left-52 right-52 md:left-72 md:right-72 bottom-2 sm:bottom-4 h-36 sm:h-40 md:h-44 lg:h-48 xl:h-52 bg-white/25 backdrop-blur-lg rounded-xl md:rounded-2xl shadow-2xl border border-white/30 z-20">
+          <DialogueArea 
+            messages={gameState.messages}
+            onSendMessage={handleSendMessage}
+          />
+        </div>
+
+        {/* Floating Affection Panel */}
+        <div className="absolute right-2 md:right-4 top-2 md:top-4 bottom-36 md:bottom-44 lg:bottom-48 w-48 md:w-64 bg-white/20 backdrop-blur-lg rounded-xl md:rounded-2xl shadow-2xl border border-white/30 z-10 overflow-hidden">
           <AffectionPanel 
             affectionScore={gameState.affectionScore}
-            characterName="Luna"
+            characterName="พี่สาวหงส์"
           />
         </div>
       </div>

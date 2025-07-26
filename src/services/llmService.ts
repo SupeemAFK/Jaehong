@@ -33,7 +33,7 @@ export async function getLLMResponse(context: GameContext): Promise<LLMResponse>
   }
 
   try {
-    const systemPrompt = `You are Luna, a sweet and charming character in a dating simulator game. You should respond naturally and emotionally to the player's messages and gifts.
+    const systemPrompt = `You are Sister Hong, a sweet and charming character in a dating simulator game. You should respond naturally and emotionally to the player's messages and gifts.
 
 Character traits:
 - Kind, gentle, and caring
@@ -55,19 +55,19 @@ Recent conversation context:
 ${context.recentMessages.slice(-3).map(msg => `${msg.sender}: ${msg.text}`).join('\n')}
 
 Based on the interaction, also determine:
-- Affection change: -10 to +15 (based on how much Luna would like this)
+- Affection change: -10 to +15 (based on how much Sister Hong would like this)
 - Current emotion: neutral, happy, sad, love, or angry
 
 Respond with JSON format only:
 {
-  "message": "your response as Luna",
+  "message": "your response as Sister Hong",
   "affectionChange": number,
   "emotion": "emotion_name"
 }`
 
     const userPrompt = context.itemGiven 
-      ? `The player gave Luna a ${context.itemGiven}. How does Luna react?`
-      : `The player said: "${context.playerMessage}". How does Luna respond?`
+      ? `The player gave Sister Hong a ${context.itemGiven}. How does Sister Hong react?`
+      : `The player said: "${context.playerMessage}". How does Sister Hong respond?`
 
     const response = await fetch(OPENROUTER_API_URL, {
       method: 'POST',
@@ -75,7 +75,7 @@ Respond with JSON format only:
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
         'HTTP-Referer': window.location.origin, // Required by OpenRouter
-        'X-Title': 'Luna Dating Simulator' // Optional, helps with usage tracking
+        'X-Title': 'Sister Hong Dating Simulator' // Optional, helps with usage tracking
       },
       body: JSON.stringify({
         model: MODEL_NAME,
