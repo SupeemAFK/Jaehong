@@ -14,7 +14,7 @@ const getAffectionLevel = (score: number) => {
   return { level: 'คนแปลกหน้า', emoji: '😕', color: 'text-gray-500' }
 }
 
-export default function AffectionPanel({ affectionScore, characterName, points }: AffectionPanelProps) {
+export default function AffectionPanel({ affectionScore, characterName }: AffectionPanelProps) {
   const affectionLevel = getAffectionLevel(affectionScore)
 
   return (
