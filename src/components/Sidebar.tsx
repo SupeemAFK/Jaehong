@@ -3,20 +3,20 @@ import { useDraggable } from '@dnd-kit/core'
 interface Item {
   id: string
   name: string
-  emoji: string
+  image: string
   description: string
   cost: number
 }
 
 const GAME_ITEMS: Item[] = [
-  { id: 'rose', name: 'กุหลาบ', emoji: '🌹', description: 'กุหลาบแดงสวยงาม', cost: 5 },
-  { id: 'chocolate', name: 'ช็อกโกแลต', emoji: '🍫', description: 'ช็อกโกแลตหวานๆ', cost: 3 },
-  { id: 'coffee', name: 'กาแฟ', emoji: '☕', description: 'กาแฟร้อนๆ', cost: 2 },
-  { id: 'book', name: 'หนังสือ', emoji: '📚', description: 'หนังสือน่าสนใจ', cost: 4 },
-  { id: 'music', name: 'เพลง', emoji: '🎵', description: 'เสียงเพลงไพเราะ', cost: 3 },
-  { id: 'cake', name: 'เค้ก', emoji: '🎂', description: 'เค้กอร่อยๆ', cost: 6 },
-  { id: 'letter', name: 'จดหมายรัก', emoji: '💌', description: 'จดหมายจากใจจริง', cost: 4 },
-  { id: 'gift', name: 'กล่องของขวัญ', emoji: '🎁', description: 'ของขวัญเซอร์ไพรส์', cost: 8 }
+  { id: 'apple', name: 'แอปเปิล', image: '/items/apple.png', description: 'แอปเปิลสีแดงสด', cost: 5 },
+  { id: 'longkong', name: 'ลองกอง', image: '/items/longkong.png', description: 'ลองกองหวานๆ', cost: 3 },
+  { id: 'pakchee', name: 'ผักชี', image: '/items/pakchee.png', description: 'ผักชีเขียวๆ', cost: 2 },
+  { id: 'rawegg', name: 'ไข่เป็ด', image: '/items/rawegg.png', description: 'ไข่เป็ดสดๆ จากฟาร์ม', cost: 4 },
+  { id: 'rawfish', name: 'ปลาสด', image: '/items/rawfish.png', description: 'ปลาสดสดๆ จากทะเล', cost: 3 },
+  { id: 'rawshrimp', name: 'กุ้งสด', image: '/items/rawshrimp.png', description: 'กุ้งสดสดๆ จากทะเล', cost: 6 },
+  { id: 'spinach', name: 'ผักบุ้ง', image: '/items/spinach.png', description: 'ผักบุ้งเขียวๆ', cost: 4 },
+  { id: 'flowers', name: 'ช่อดอกไม้', image: '/items/flowers.png', description: 'ดอกไม้สวยๆ', cost: 8 }
 ]
 
 interface SidebarProps {
@@ -47,7 +47,11 @@ function DraggableItem({ item, isOwned, canAfford, onPurchase }: DraggableItemPr
     return (
       <div className="p-3 m-2 bg-white/40 backdrop-blur-sm rounded-xl shadow-lg border border-white/50">
         <div className="text-center">
-          <div className="text-3xl mb-2 opacity-60">{item.emoji}</div>
+          <div className='mb-5 flex items-center justify-center'>
+            <div className="opacity-60 w-10 h-10">
+              <img  src={item.image} alt={item.name} className="w-full object-cover" />
+            </div>
+          </div>
           <div className="font-semibold text-gray-800 text-sm">{item.name}</div>
           <div className="text-xs text-gray-700 mt-1">{item.description}</div>
           <div className="mt-2 flex items-center justify-between">
@@ -83,7 +87,11 @@ function DraggableItem({ item, isOwned, canAfford, onPurchase }: DraggableItemPr
       `}
     >
       <div className="text-center">
-        <div className="text-3xl mb-2">{item.emoji}</div>
+        <div className='mb-5 flex items-center justify-center'>
+          <div className="opacity-60 w-10 h-10">
+            <img  src={item.image} alt={item.name} className="w-full object-cover" />
+          </div>
+        </div>
         <div className="font-semibold text-gray-800 text-sm">{item.name}</div>
         <div className="text-xs text-gray-700 mt-1">{item.description}</div>
         <div className="text-xs text-green-600 font-bold mt-1">✅ เป็นเจ้าของแล้ว</div>
