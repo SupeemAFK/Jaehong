@@ -4,6 +4,7 @@ import Sidebar from './components/Sidebar'
 import Character from './components/Character'
 import DialogueArea from './components/DialogueArea'
 import AffectionPanel from './components/AffectionPanel'
+import AudioDebugPanel from './components/AudioDebugPanel'
 import { getLLMResponse } from './services/llmService'
 import { TTSService } from './services/ttsService'
 
@@ -31,6 +32,8 @@ function App() {
     isPlayingAudio: false,
     currentAudio: null
   })
+
+  const [showDebugPanel, setShowDebugPanel] = useState(false)
 
   // Function to handle TTS playback
   const playTTS = async (text: string) => {
@@ -229,6 +232,19 @@ function App() {
               </div>
             </div>
           )}
+
+          {/* Debug Panel Toggle Button (Development Only) */}
+          {import.meta.env.DEV && (
+            <div className="absolute top-8 left-8">
+              <button
+                onClick={() => setShowDebugPanel(true)}
+                className="bg-purple-500/80 hover:bg-purple-600/80 text-white px-4 py-2 rounded-lg backdrop-blur-sm border border-white/20 text-sm font-medium shadow-lg transition-all"
+                title="Open Audio Debug Panel"
+              >
+                🔧 Debug Audio
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Floating Dialogue Area - Full width between sidebars */}
@@ -250,6 +266,12 @@ function App() {
             points={gameState.points}
           />
         </div>
+
+        {/* Audio Debug Panel */}
+        <AudioDebugPanel 
+          isVisible={showDebugPanel}
+          onClose={() => setShowDebugPanel(false)}
+        />
       </div>
     </DndContext>
   )
